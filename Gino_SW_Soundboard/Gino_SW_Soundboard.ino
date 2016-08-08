@@ -41,6 +41,9 @@ int Battlevel;					  // Battery Level Monitor
 String filetype, Song;
 
 // These are the pins used for the music maker shield
+#define BREAKOUT_RESET 9    // VS1053 reset pin (output)
+#define BREAKOUT_CS    10   // VS1053 chip select pin (output)
+#define BREAKOUT_DCS   8    // VS1053 Data/command select pin (output)
 #define SHIELD_RESET  -1    // VS1053 reset pin (unused!)
 #define SHIELD_CS      7    // VS1053 chip select pin (output)
 #define SHIELD_DCS     6    // VS1053 Data/command select pin (output)
@@ -53,9 +56,9 @@ Adafruit_VS1053_FilePlayer musicPlayer =
   
   
  //Screen Declarations
-#define OLED_RESET 4
+/* #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
-
+ */
 #define NUMFLAKES 10
 #define XPOS 0
 #define YPOS 1
@@ -100,6 +103,14 @@ void setup() {
   
   
 //Setup for MP3 Shield
+  Serial.println("Adafruit VS1053 Simple Test");
+
+  if (! musicPlayer.begin()) { // initialise the music player
+     Serial.println(F("Couldn't find VS1053, do you have the right pins defined?"));
+     while (1);
+  }
+  Serial.println(F("VS1053 found"));
+  
   SD.begin(CARDCS);    // initialise the SD card
   musicPlayer.setVolume(50,50); // Set volume (lower numbers == louder volume)
   musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);  // DREQ int for background audio playing
@@ -107,7 +118,8 @@ void setup() {
 
 
 //Screen Setup   
-   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize screen via address
+
+//   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize screen via address
 
 }
 void loop() {
@@ -118,16 +130,16 @@ void loop() {
   Serial.print("Voltage: "); Serial.print(voltage); Serial.println("V"); 
 
   // text display tests - Stock code from adafruit 
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0,0);
-  display.println("Hello, world!");
-  display.setTextColor(BLACK, WHITE); // 'inverted' text
-  display.println(3.141592);
-  display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.print("0x"); display.println(0xDEADBEEF, HEX);
-  display.display();
+//  display.setTextSize(1);
+//  display.setTextColor(WHITE);
+//  display.setCursor(0,0);
+//  display.println("Hello, world!");
+//  display.setTextColor(BLACK, WHITE); // 'inverted' text
+//  display.println(3.141592);
+//  display.setTextSize(2);
+//  display.setTextColor(WHITE);
+//  display.print("0x"); display.println(0xDEADBEEF, HEX);
+//  display.display();
   
   
    //Random LED Blinking when not being used 
