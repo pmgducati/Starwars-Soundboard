@@ -5,9 +5,8 @@
 #include <SPI.h>
 #include <Adafruit_VS1053.h>
 #include <SD.h>
-//Screen Libraries
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+
+
 
 //Trellis Declarations
 
@@ -28,11 +27,9 @@ int randOn = 0;                   // Initialize a variable for the ON time
 int randled1 = 0;                 // Initialize a variable for the random LED on function
 int randled2 = 0;                 // Initialize a variable for the random LED off function
 long sleepTime;                   // Timer to shut off LEDs
-long currentTime;				  // Time on
-long previousTime;				  // Compared time
-int Shutdown;					  // Flag to initiate Shutdown
-int Battlevel;					  // Battery Level Monitor
-
+long currentTime;				          // Time on
+long previousTime;				        // Compared time
+int Shutdown;					            // Flag to initiate Shutdown
 
 
 //MP3 Shield Declarations
@@ -41,35 +38,39 @@ int Battlevel;					  // Battery Level Monitor
 String filetype, Song;
 
 // These are the pins used for the music maker shield
-#define BREAKOUT_RESET 9    // VS1053 reset pin (output)
-#define BREAKOUT_CS    10   // VS1053 chip select pin (output)
-#define BREAKOUT_DCS   8    // VS1053 Data/command select pin (output)
-#define SHIELD_RESET  -1    // VS1053 reset pin (unused!)
-#define SHIELD_CS      7    // VS1053 chip select pin (output)
-#define SHIELD_DCS     6    // VS1053 Data/command select pin (output)
-#define CARDCS         4	// Card chip select pin
-#define DREQ 		   3    // VS1053 Data request, ideally an Interrupt pin
+//#define BREAKOUT_RESET 9        // VS1053 reset pin (output)
+//#define BREAKOUT_CS    10       // VS1053 chip select pin (output)
+//#define BREAKOUT_DCS   8        // VS1053 Data/command select pin (output)
+#define SHIELD_RESET  -1          // VS1053 reset pin (unused!)
+#define SHIELD_CS      7          // VS1053 chip select pin (output)
+#define SHIELD_DCS     6          // VS1053 Data/command select pin (output)
+#define CARDCS         4	        // Card chip select pin
+#define DREQ 		       3          // VS1053 Data request, ideally an Interrupt pin
 
 Adafruit_VS1053_FilePlayer musicPlayer = 
   Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
-  
-  
-  
- //Screen Declarations
-/* #define OLED_RESET 4
-Adafruit_SSD1306 display(OLED_RESET);
- */
-#define NUMFLAKES 10
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
+
+
+//LED Declarations
+
+#define ledRpin 2
+#define ledBpin 5
+#define ledGpin 8
+int brightness = 0;               // how bright the LED is
+int fadeAmount = 5;               // how many points to fade the LED by
+
+
+//On/Mode Button Declarations
+
+#define buttonPin 9
+int ButtonValue = 0;
+int LEDBlink = 1;
 
 void setup() {
   Serial.begin(9600);
-  //Serial.println("Gino Starwars Soundboard");
+  Serial.println("Gino Starwars Soundboard");
 
-  
-  
+
 //Setup for Trellis
   //File name concatenation
   filetype = String(".wav");
@@ -103,46 +104,53 @@ void setup() {
   
   
 //Setup for MP3 Shield
-  Serial.println("Adafruit VS1053 Simple Test");
 
-  if (! musicPlayer.begin()) { // initialise the music player
+  if (! musicPlayer.begin()) {    // initialise the music player
      Serial.println(F("Couldn't find VS1053, do you have the right pins defined?"));
      while (1);
   }
   Serial.println(F("VS1053 found"));
   
   SD.begin(CARDCS);    // initialise the SD card
-  musicPlayer.setVolume(50,50); // Set volume (lower numbers == louder volume)
+  musicPlayer.setVolume(40,40); // Set volume (lower numbers == louder volume)
   musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);  // DREQ int for background audio playing
 
+//LED Setup
+pinMode(ledRpin, OUTPUT);
+pinMode(ledGpin, OUTPUT);
+pinMode(ledBpin, OUTPUT);
 
-
-//Screen Setup   
-
-//   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize screen via address
+//button Setup
+pinMode(buttonPin, INPUT);
 
 }
 void loop() {
   delay(30); // 30ms delay is required, for trellis functionality
   currentTime = millis();
-  Battlevel = analogRead(A0);
-  float voltage = Battlevel * (5.00 / 1023.00) * 2; //convert the value to a true voltage.
-  Serial.print("Voltage: "); Serial.print(voltage); Serial.println("V"); 
+  int ModeNumber = digitalRead(buttonPin);
 
-  // text display tests - Stock code from adafruit 
-//  display.setTextSize(1);
-//  display.setTextColor(WHITE);
-//  display.setCursor(0,0);
-//  display.println("Hello, world!");
-//  display.setTextColor(BLACK, WHITE); // 'inverted' text
-//  display.println(3.141592);
-//  display.setTextSize(2);
-//  display.setTextColor(WHITE);
-//  display.print("0x"); display.println(0xDEADBEEF, HEX);
-//  display.display();
-  
-  
-   //Random LED Blinking when not being used 
+//When Mode Button is pressed, the sleep timer is reset to 0, shift the button value by +32 and change the mode (1-4)
+  if (ModeNumber == 1){   
+    sleepTime = 0;
+    ButtonValue = ButtonValue + 32;
+    LEDBlink = LEDBlink + 1;
+    if (LEDBlink == 5){
+      LEDBlink = 1;
+    }
+    //Blink LED # of times to corresponding mode
+    for (uint8_t b=1; b<=LEDBlink; b++) {
+    digitalWrite(ledBpin, HIGH);
+    delay(250);
+    digitalWrite(ledBpin, LOW);
+    delay (250);
+    }
+      //resets button value to 0 when returning to mode 1
+      if (ButtonValue > 100){
+        ButtonValue=0;
+        LEDBlink=1;
+      }
+    }
+//Random Trellis LED Blinking when not being used 
    if (sleepTime < 180000){
      sleepTime = ((currentTime - previousTime) + sleepTime);
      previousTime = currentTime;
@@ -156,21 +164,31 @@ void loop() {
      trellis.clrLED(randled2);            
      trellis.writeDisplay();                
    }
+//if no button pressed in 3 minutes turn off all LEDs
   else{
-//if no button pressed turn off all LEDs
 	 if (sleepTime > 180000 && Shutdown == 1){
-        musicPlayer.playFullFile("SHUTDOWN.wav");        
-     }
-        for (uint8_t i=0; i<numKeys; i++) { 
+        musicPlayer.playFullFile("SLEEP.wav");        
+        for (uint8_t i=0; i<=numKeys; i++) { 
         trellis.clrLED(i);
         trellis.writeDisplay();     
         delay(50);
         Shutdown = 0;
-     }
+        Serial.println(i);
+     } 
+	 }
   }
+ //Blue LED Breathes when in sleep mode
+ if (sleepTime > 180000 && Shutdown == 0){ 
+    analogWrite(ledBpin, brightness);
+    brightness = brightness + fadeAmount;
+      if (brightness <= 0 || brightness >= 255) {
+        fadeAmount = -fadeAmount;
+      }
+    delay(30);
+ }
 // If a button was just pressed or released...
     if (trellis.readSwitches()) {
-      sleepTime = 0;
+      sleepTime = 0;                  //reset sleep timer
       for (uint8_t i=0; i<numKeys; i++) {    // go through every button
   if (trellis.justPressed(i)) {  			 // if it was pressed, turn it on
     trellis.setLED(i);
@@ -179,11 +197,17 @@ void loop() {
   if (trellis.justReleased(i)) {			 // if it was released, play audio file and turn it off
     trellis.clrLED(i);
     delay(50);
-    Song = i + filetype;					 //Concatenate the strings to filename, convert to char and inject in to play command
-    int str_len = Song.length() + 1; 		 //Im sure there is a better way to do this ;)
+    i=i+ButtonValue;
+    Song = i + filetype;					    //Concatenate the strings to filename, convert to char and inject in to play command
+    int str_len = Song.length() + 1; 		 
     char FileName[str_len];
     Song.toCharArray(FileName, str_len);
+    digitalWrite(ledBpin, LOW);
+    digitalWrite(ledGpin, HIGH);
     musicPlayer.playFullFile(FileName);
+    delay(500);
+    digitalWrite(ledGpin, LOW);
+    Serial.print("   i  ");  Serial.println(i);
   }
       }
       trellis.writeDisplay();				 // tell the trellis to set the LEDs we requested
