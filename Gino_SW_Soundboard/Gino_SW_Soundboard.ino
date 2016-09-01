@@ -65,10 +65,16 @@ int fadeAmount = 5;               // how many points to fade the LED by
 #define buttonPin 9
 int ButtonValue = 0;
 int LEDBlink = 1;
+const int OnOffPin = 10;
+
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Gino Starwars Soundboard");
+
+//Switch the MOSFETs to On
+  pinMode(OnOffPin, OUTPUT);                             // initialize digital OnOffPin as an output.
+  digitalWrite(OnOffPin, HIGH);                          // turn the OnOffPin HIGH and thus the power circuit
 
 
 //Setup for Trellis
@@ -151,7 +157,7 @@ void loop() {
       }
     }
 //Random Trellis LED Blinking when not being used 
-   if (sleepTime < 180000){
+   if (sleepTime < 30000){
      sleepTime = ((currentTime - previousTime) + sleepTime);
      previousTime = currentTime;
      Shutdown = 1;
@@ -166,7 +172,7 @@ void loop() {
    }
 //if no button pressed in 3 minutes turn off all LEDs
   else{
-	 if (sleepTime > 180000 && Shutdown == 1){
+	 if (sleepTime > 30000 && Shutdown == 1){
         musicPlayer.playFullFile("SLEEP.wav");        
         for (uint8_t i=0; i<=numKeys; i++) { 
         trellis.clrLED(i);
@@ -178,7 +184,7 @@ void loop() {
 	 }
   }
  //Blue LED Breathes when in sleep mode
- if (sleepTime > 180000 && Shutdown == 0){ 
+ if (sleepTime > 30000 && Shutdown == 0){ 
     analogWrite(ledBpin, brightness);
     brightness = brightness + fadeAmount;
       if (brightness <= 0 || brightness >= 255) {
@@ -186,6 +192,18 @@ void loop() {
       }
     delay(30);
  }
+ if (sleepTime > 45000 && Shutdown == 0){
+    digitalWrite(ledBpin, LOW);
+    delay(50);
+    digitalWrite(ledRpin, HIGH);
+    delay(200);
+    digitalWrite(ledRpin, LOW);
+    delay(200);
+    digitalWrite(ledRpin, HIGH);
+    delay(200);
+    digitalWrite(OnOffPin, LOW);      //shut off the circuit 
+ }
+ 
 // If a button was just pressed or released...
     if (trellis.readSwitches()) {
       sleepTime = 0;                  //reset sleep timer
