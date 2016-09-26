@@ -29,8 +29,8 @@ int randled2 = 0;                 // Initialize a variable for the random LED of
 long sleepTime;                   // Timer to shut off LEDs
 long currentTime;				          // Time on
 long previousTime;				        // Compared time
-int Shutdown;					            // Flag to initiate Shutdown
-
+int Shutdown;                     // Flag to initiate Shutdown
+int Sleep;                        // Flag to initiate Sleep
 
 //MP3 Shield Declarations
 
@@ -66,10 +66,10 @@ int fadeAmount = 5;               // how many points to fade the LED by
 int ButtonValue = 0;
 int LEDBlink = 1;
 
-void setup() {
-  Serial.begin(9600);
-  Serial.println("Gino Starwars Soundboard");
 
+void setup() {
+//  Serial.begin(9600);
+//  Serial.println("Gino Starwars Soundboard");
 
 //Setup for Trellis
   //File name concatenation
@@ -154,7 +154,9 @@ void loop() {
    if (sleepTime < 180000){
      sleepTime = ((currentTime - previousTime) + sleepTime);
      previousTime = currentTime;
+     digitalWrite(ledRpin, LOW);
      Shutdown = 1;
+     Sleep = 1;
      randOn = random (100, 900); 			// generate ON time between 0.1 and 0.9 seconds
      randled1 = random (0, 31);   			// generate random LED to turn on
      randled2 = random (0, 31);    			// generate random LED to turn off
@@ -166,19 +168,22 @@ void loop() {
    }
 //if no button pressed in 3 minutes turn off all LEDs
   else{
-	 if (sleepTime > 180000 && Shutdown == 1){
+	 if (sleepTime > 180000 && Sleep == 1){
         musicPlayer.playFullFile("SLEEP.wav");        
         for (uint8_t i=0; i<=numKeys; i++) { 
         trellis.clrLED(i);
         trellis.writeDisplay();     
         delay(50);
-        Shutdown = 0;
+        Sleep = 0;
         Serial.println(i);
      } 
 	 }
   }
  //Blue LED Breathes when in sleep mode
- if (sleepTime > 180000 && Shutdown == 0){ 
+ if (sleepTime > 180000 && sleepTime < 600000 && Sleep == 0 && Shutdown == 1){ 
+    Serial.println("Sleep");
+    sleepTime = ((currentTime - previousTime) + sleepTime);
+    previousTime = currentTime;
     analogWrite(ledBpin, brightness);
     brightness = brightness + fadeAmount;
       if (brightness <= 0 || brightness >= 255) {
@@ -186,6 +191,21 @@ void loop() {
       }
     delay(30);
  }
+else{
+if (sleepTime > 600000){
+      Shutdown = 0;
+ } 
+}
+
+ if (Shutdown == 0){
+    digitalWrite(ledBpin, LOW);
+    delay(50);
+    digitalWrite(ledRpin, HIGH);
+    delay(200);
+    musicPlayer.playFullFile("Tone.wav");
+    
+   }
+ 
 // If a button was just pressed or released...
     if (trellis.readSwitches()) {
       sleepTime = 0;                  //reset sleep timer
