@@ -4019,7 +4019,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="R1" library="rcl" deviceset="R-US_" device="M1206" value="RC1206FR-07100RL"/>
 <part name="R2" library="rcl" deviceset="R-US_" device="M1206" value="RC1206FR-07100RL"/>
 <part name="R3" library="rcl" deviceset="R-US_" device="M1206" value="RC1206FR-07100RL"/>
-<part name="R4" library="rcl" deviceset="R-US_" device="M1206" value="RC1206FR-07100RL"/>
+<part name="R4" library="rcl" deviceset="R-US_" device="M1206" value="RT1210BRD07150RL"/>
 <part name="SV5" library="con-lstb" deviceset="MA08-1" device="" value="68000-108HLF"/>
 <part name="SV6" library="con-lstb" deviceset="MA05-1" device=""/>
 <part name="SV7" library="con-lstb" deviceset="MA04-1" device=""/>
@@ -4100,13 +4100,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <wire x1="40.64" y1="63.5" x2="17.78" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$8" class="0">
-<segment>
-<wire x1="60.96" y1="88.9" x2="93.98" y2="88.9" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="88.9" x2="93.98" y2="99.06" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="99.06" x2="139.7" y2="99.06" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="EN_GND" class="0">
 <segment>
 <wire x1="142.24" y1="48.26" x2="127" y2="48.26" width="0.1524" layer="91"/>
@@ -4116,12 +4109,15 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <pinref part="SV2" gate="1" pin="4"/>
 <wire x1="53.34" y1="73.66" x2="53.34" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="53.34" y1="73.66" x2="53.34" y2="88.9" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="88.9" x2="60.96" y2="88.9" width="0.1524" layer="91"/>
 <junction x="53.34" y="73.66"/>
 <pinref part="SV6" gate="G$1" pin="4"/>
 <wire x1="137.16" y1="63.5" x2="127" y2="63.5" width="0.1524" layer="91"/>
 <junction x="127" y="63.5"/>
 <pinref part="JP1" gate="G$1" pin="1"/>
+<wire x1="93.98" y1="88.9" x2="93.98" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="99.06" x2="137.16" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="SV5" gate="1" pin="1"/>
+<wire x1="53.34" y1="88.9" x2="93.98" y2="88.9" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SW5V" class="0">
@@ -4159,6 +4155,10 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <pinref part="SV7" gate="1" pin="2"/>
 <wire x1="0" y1="68.58" x2="58.42" y2="68.58" width="0.1524" layer="91"/>
 <junction x="58.42" y="68.58"/>
+<pinref part="SV2" gate="1" pin="3"/>
+<wire x1="55.88" y1="53.34" x2="55.88" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="58.42" x2="58.42" y2="58.42" width="0.1524" layer="91"/>
+<pinref part="SV5" gate="1" pin="2"/>
 </segment>
 </net>
 <net name="N$7" class="0">
